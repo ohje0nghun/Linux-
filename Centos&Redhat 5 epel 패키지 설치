@@ -1,0 +1,27 @@
+/etc/yum.repos.d 경로로 이동
+
+vi CentOS.repo
+# 아래내용 복사
+[base]
+name=CentOS-$releasever - Base
+baseurl=https://mirror.nsc.liu.se/centos-store/5.11/os/i386/
+gpgcheck=0
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-5
+
+
+[updates]
+name=CentOS-$releasever - Updates
+baseurl=https://mirror.nsc.liu.se/centos-store/5.11/updates/i386/
+gpgcheck=0
+enabled=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-5
+
+
+[extras]
+name=CentOS-$releasever - Extras
+baseurl=https://mirror.nsc.liu.se/centos-store/5.11/extras/i386/
+gpgcheck=0
+enabled=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-5
+
+
