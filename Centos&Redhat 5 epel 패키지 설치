@@ -25,3 +25,19 @@ enabled=1
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-5
 
 
+yum install epel-release
+
+
+sqlplus에서 이전 명령어가 방향키로 로드되지 않을때 아래 작업 실행
+
+#epel-release 설치 시 가능
+yum install rlwrap 
+
+작업할 계정 으로 변경
+vi .bash_profile
+# 아래 내용 추가
+alias sqlplus='rlwrap sqlplus'
+
+위 작업까지 완료 후 sqlplus로 접속하여 자동완성 및 이전 명령어 로드 기능 정상 작동하는지 확인
+
+
