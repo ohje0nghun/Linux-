@@ -41,3 +41,35 @@ alias sqlplus='rlwrap sqlplus'
 위 작업까지 완료 후 sqlplus로 접속하여 자동완성 및 이전 명령어 로드 기능 정상 작동하는지 확인
 
 
+
+* REDHAT 6 버전
+
+리눅스는 명령어 입력 후 기존 사용했던 명령어를 위 방향키를 누르면 불러올수 있지만 SQL 터미널에선 ^[[A 이 입력되는 현상 해결
+
+
+*root 계정으로 진행
+
+
+1. redhat 6 버전확인
+
+cat /etc/redhat-release
+ 
+
+2. eqel 패키지 설치
+
+yum install https://archives.fedoraproject.org/pub/archive/epel/6/x86_64/Packages/e/epel-release-6-8.noarch.rpm
+3. rlwrap 패키지 설치
+
+yum install rlwrap
+ 
+
+* oracle 계정으로 전환
+
+위 패키지가 정상적으로 설치되었으면 profile 파일에서 아래설정 추가
+
+vi ~/.bash_profile
+
+alias sqlplus='rlwrap sqlplus'
+ 
+
+SQL 터미널 접속해서 이전 명령어 불러오는지 확인
