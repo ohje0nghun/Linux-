@@ -1,0 +1,53 @@
+def call(String repoUrl, String path, String env) {
+    pipeline {
+        agent any
+        
+        environment {
+            ARGOCD_SERVER = 'your-argocd-server' // Argo CD 서버 URL 설정
+            ARGOCD_USERNAME = 'your-argocd-username' // Argo CD 사용자 이름 설정
+            ARGOCD_PASSWORD = credentials('your-argocd-password') // Argo CD 비밀번호 설정 (Jenkins Credential)
+            APP_NAME = "${JOB_NAME}" // Jenkins 잡의 이름을 애플리케이션 이름으로 사용
+        }
+        
+        stages {
+            stage('Argo CD Set Application') {
+                steps {
+                    // Argo CD 애플리케이션 설정
+                    script {
+                        sh "argocd app set ${APP_NAME} --repo ${repoUrl} --path ${path} --env ${env} --server ${ARGOCD_SERVER} --username ${ARGOCD_USERNAME} --password ${ARGOCD_PASSWORD}"
+                    }
+                }
+            }
+        }
+        
+        post {
+            success {
+                echo 'Argo CD application set successful!'
+            }
+            failure {
+                echo 'Failed to set Argo CD application. Please check the configuration.'
+            }
+        }
+    }
+}
+
+
+
+
+@Library('your-global-library') // Jenkins Global Pipeline Library 호출
+
+pipeline {
+    agent any
+    
+    stages {
+        stage('Set Argo CD Application') {
+            steps {
+                // Jenkins Global Pipeline Library에 저장된 함수 호출
+                argocdSetApp('https://github.com/your_username/your_repository.git', 'path/to/app', 'your-environment')
+            }
+        }
+    }
+}
+
+
+위의 예시에서 'your-global-library'는 Jenkins Global Pipeline Library의 이름입니다. argocdSetApp은 해당 라이브러리에 정의된 함수의 이름입니다. 이 함수는 Groovy 스크립트 파일인 argocdSetApp.groovy에 정의되어 있습니다. 함수에 필요한 매개변수를 전달하여 호출할 수 있습니다.
