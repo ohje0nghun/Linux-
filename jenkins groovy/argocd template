@@ -6,7 +6,7 @@ def call(String repoUrl, String path, String env) {
             ARGOCD_SERVER = 'your-argocd-server' // Argo CD 서버 URL 설정
             ARGOCD_USERNAME = 'your-argocd-username' // Argo CD 사용자 이름 설정
             ARGOCD_PASSWORD = credentials('your-argocd-password') // Argo CD 비밀번호 설정 (Jenkins Credential)
-            APP_NAME = "${JOB_NAME}" // Jenkins 잡의 이름을 애플리케이션 이름으로 사용
+            APP_NAME = env.JOB_NAME.split('/').last() // Jenkins 잡의 이름을 애플리케이션 이름으로 사용
         }
         
         stages {
