@@ -49,3 +49,7 @@ checkoutBitbucketRepo('https://bitbucket.org/your_username/your_repository.git',
 위의 예시에서 'your-global-library'는 Jenkins Global Pipeline Library의 이름입니다. 'your_username', 'your_repository', 'your_credentials_id'는 각각 Bitbucket 리포지토리의 사용자 이름, 리포지토리 이름, Jenkins에서 사용할 인증 정보의 ID에 해당합니다. 'main'은 체크아웃할 브랜치의 이름입니다.
 
 
+
+
+def jobName = env.JOB_NAME
+println "현재 작업의 이름은 $jobName 입니다."
