@@ -1,0 +1,178 @@
+Jenkins CLI를 사용하기 위한 확인 사항
+Jenkins 서버 URL 및 포트 확인
+
+Jenkins 서버 URL이 정확한지 확인합니다.
+기본 포트는 8080이지만, 다른 포트를 사용할 수도 있습니다.
+Jenkins CLI 다운로드
+
+Jenkins CLI 도구 (jenkins-cli.jar)를 다운로드합니다:
+bash
+코드 복사
+wget http://<jenkins-server>/jnlpJars/jenkins-cli.jar
+API 토큰 생성
+
+Jenkins 사용자 페이지에서 API 토큰을 생성합니다.
+Jenkins에 로그인하고 사용자 페이지로 이동합니다.
+"API Token" 섹션에서 새로운 토큰을 생성하고 복사합니다.
+CLI 명령어 실행
+
+HTTP 모드로 CLI를 사용하여 Jenkins 서버에 연결합니다.
+예시 명령어:
+bash
+코드 복사
+java -jar jenkins-cli.jar -s http://<jenkins-server>/ -http -auth <username>:<api-token> create-job <job-name> < <config.xml>
+폴더 내에 Job 생성하기
+폴더 확인
+
+ID라는 폴더가 Jenkins에 이미 생성되어 있는지 확인합니다.
+폴더가 생성되어 있지 않다면, 폴더를 생성합니다 (웹 인터페이스를 사용하거나, CLI를 통해 생성 가능).
+XML 구성 파일 준비
+
+빈 파이프라인 Job을 위한 XML 구성 파일을 준비합니다 (sfmi-pqt-plugin-app-config.xml):
+xml
+코드 복사
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@2.40">
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties/>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.92">
+    <script></script>
+    <sandbox>true</sandbox>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>
+CLI 명령어 실행
+
+Jenkins CLI를 사용하여 ID 폴더 내에 Job을 생성합니다:
+bash
+코드 복사
+java -jar jenkins-cli.jar -s http://<jenkins-server>/ -http -auth <username>:<api-token> create-job ID/sfmi-pqt-plugin-app < sfmi-pqt-plugin-app-config.xml
+HTTP 모드로 CLI 사용
+만약 위 명령어에서 문제가 발생하면, WebSocket 대신 HTTP 모드를 사용하여 명령어를 실행합니다:
+
+bash
+코드 복사
+java -jar jenkins-cli.jar -s http://<jenkins-server>/ -http -auth <username>:<api-token> create-job ID/sfmi-pqt-plugin-app < sfmi-pqt-plugin-app-config.xml
+Jenkins 버전 확인
+Jenkins와 관련된 CLI 및 플러그인의 버전이 최신인지 확인합니다. 버전 불일치가 문제를 일으킬 수 있습니다.
+
+Jenkins 로그 확인
+Jenkins 서버 로그를 확인하여 추가적인 문제를 디버깅합니다. 로그 파일 위치는 일반적으로 $JENKINS_HOME/logs 또는 웹 인터페이스의 "Manage Jenkins" > "System Log"에서 확인할 수 있습니다.
+
+이 단계를 따라가면 Jenkins CLI를 사용하여 Job을 생성할 수 있을 것입니다. 그래도 문제가 지속된다면 Jenkins 서버 설정이나 네트워크 설정을 추가적으로 확인해야 할 수 있습니다.
+
+
+1. 템플릿 XML 파일 작성
+먼저, 일반 파이프라인과 멀티브랜치 파이프라인의 예제 XML 파일을 템플릿화합니다.
+
+일반 파이프라인 템플릿 (pipeline-template.xml)
+xml
+코드 복사
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@2.40">
+  <actions/>
+  <description>${DESCRIPTION}</description>
+  <keepDependencies>false</keepDependencies>
+  <properties/>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.92">
+    <script>${SCRIPT}</script>
+    <sandbox>true</sandbox>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>
+멀티브랜치 파이프라인 템플릿 (multibranch-template.xml)
+xml
+코드 복사
+<?xml version='1.1' encoding='UTF-8'?>
+<org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject plugin="workflow-multibranch@2.23">
+  <actions/>
+  <description>${DESCRIPTION}</description>
+  <properties/>
+  <folderViews class="com.cloudbees.hudson.plugins.folder.views.DefaultFolderViewHolder">
+    <views>
+      <hudson.model.AllView>
+        <owner class="org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject" reference="../../.."/>
+        <name>All</name>
+        <filterExecutors>false</filterExecutors>
+        <filterQueue>false</filterQueue>
+        <properties class="hudson.model.View$PropertyList"/>
+      </hudson.model.AllView>
+    </views>
+    <tabBar class="hudson.views.DefaultViewsTabBar"/>
+    <primaryView>All</primaryView>
+  </folderViews>
+  <healthMetrics/>
+  <icon class="com.cloudbees.hudson.plugins.folder.icons.StockFolderIcon"/>
+  <orphanedItemStrategy class="com.cloudbees.hudson.plugins.folder.computed.DefaultOrphanedItemStrategy">
+    <pruneDeadBranches>true</pruneDeadBranches>
+    <daysToKeep>0</daysToKeep>
+    <numToKeep>0</numToKeep>
+  </orphanedItemStrategy>
+  <triggers/>
+  <sources class="jenkins.branch.MultiBranchProject$BranchSourceList" plugin="branch-api@2.0.20">
+    <data>
+      <jenkins.branch.BranchSource>
+        <source class="hudson.plugins.git.GitSCMSource" plugin="git@3.6.4">
+          <id>${SCM_ID}</id>
+          <remote>${GIT_REPOSITORY}</remote>
+          <credentialsId>${CREDENTIALS_ID}</credentialsId>
+        </source>
+        <strategy class="jenkins.branch.DefaultBranchPropertyStrategy">
+          <properties class="empty-list"/>
+        </strategy>
+      </jenkins.branch.BranchSource>
+    </data>
+  </sources>
+  <factory class="org.jenkinsci.plugins.workflow.multibranch.WorkflowBranchProjectFactory">
+    <scriptPath>${SCRIPT_PATH}</scriptPath>
+  </factory>
+</org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject>
+2. 템플릿 변수 치환 스크립트 작성
+이제 템플릿 파일의 변수를 실제 값으로 치환하는 스크립트를 작성합니다. 예를 들어, Python을 사용하여 템플릿을 처리할 수 있습니다.
+
+Python 스크립트 (generate_xml.py)
+python
+코드 복사
+import sys
+
+def generate_xml(template_file, output_file, **kwargs):
+    with open(template_file, 'r') as file:
+        template = file.read()
+
+    for key, value in kwargs.items():
+        template = template.replace(f"${{{key}}}", value)
+
+    with open(output_file, 'w') as file:
+        file.write(template)
+
+if __name__ == "__main__":
+    if len(sys.argv) < 3:
+        print("Usage: generate_xml.py <template_file> <output_file> [key=value ...]")
+        sys.exit(1)
+
+    template_file = sys.argv[1]
+    output_file = sys.argv[2]
+    kwargs = dict(arg.split('=') for arg in sys.argv[3:])
+
+    generate_xml(template_file, output_file, **kwargs)
+3. XML 파일 생성 및 Jenkins CLI 명령어 실행
+이제 템플릿 파일과 변수를 사용하여 실제 XML 파일을 생성하고, Jenkins CLI를 사용하여 Job을 생성합니다.
+
+예시
+bash
+코드 복사
+# 일반 파이프라인 생성
+python generate_xml.py pipeline-template.xml sfmi-pqt-plugin-app.xml DESCRIPTION="Simple pipeline job" SCRIPT="echo 'Hello, World!'"
+
+# 멀티브랜치 파이프라인 생성
+python generate_xml.py multibranch-template.xml sfmi-pqt-plugin-app-multibranch.xml DESCRIPTION="Multibranch pipeline job" SCM_ID="git-12345" GIT_REPOSITORY="https://github.com/example/repo.git" CREDENTIALS_ID="my-credentials-id" SCRIPT_PATH="Jenkinsfile"
+
+# Jenkins CLI 명령어 실행
+java -jar jenkins-cli.jar -s http://<jenkins-server>/ -http -auth <username>:<api-token> create-job ID/sfmi-pqt-plugin-app < sfmi-pqt-plugin-app.xml
+java -jar jenkins-cli.jar -s http://<jenkins-server>/ -http -auth <username>:<api-token> create-job ID/sfmi-pqt-plugin-app-multibranch < sfmi-pqt-plugin-app-multibranch.xml
+이렇게 하면, 템플릿화된 XML 파일을 통해 일반 파이프라인과 멀티브랜치 파이프라인을 쉽게 생성할 수 있습니다. 필요에 따라 템플릿 파일을 수정하고, 변수 값을 제공하여 다양한 형태의 Jenkins Job을 생성할 수 있습니다.
+
